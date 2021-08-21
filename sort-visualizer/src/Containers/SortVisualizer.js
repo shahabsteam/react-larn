@@ -4,7 +4,8 @@ import Input from "../Components/Input";
 import Button from "../Components/Button";
 
 class SortVisualizer extends Component {
-    state={array:[],interval :0,InputString:'',green:null,blue:null,timeout:5000,status:[]}
+    state={array:[],interval :50,InputString:''
+    ,green:null,blue:null,status:true,tempArr:[],finished:true,message:'',id:''}
      onChangeInput = (event)=>{
          const tempArr = event.target.value.split(" ");
         this.setState({InputString:event.target.value})
@@ -27,37 +28,71 @@ class SortVisualizer extends Component {
     Clear = (event)=>{
         this.setState({array : []});
         this.setState({InputString:''})
+        this.setState({message :''})
+        this.setState({finished:true,status:true,id:''})
+
 
     }
-    start = (event)=>{
-       
-        this.insertionSort();
+    play = ()=>{
+ 
     }
+    start = (event)=>{
+      
+        this.insertionSort();
+        this.play();
+    }
+  
     insertionSort = () => {
         // An array of integers to sort.
         
         let copy = this.state.array;
-        for (let i = 1; i <= copy.length; i++) {
-            console.log('runninga')
-            setTimeout(()=>{
-               
-                this.setState({blue:i})
-                for (let j = i - 1; j >= 0; j--) {
+            
+        var counter = 1;
+        var interval1 = setInterval(()=>{
+            if(counter<this.state.array.length){
+                if(this.state.finished){
                    
-                        this.setState({green : j})
-                        if (copy[j + 1] < copy[j]) {
-                            const temp = copy[j];
-                            copy[j] = copy[j + 1];
-                            copy[j + 1] = temp;
-                            this.setState({array:copy})
-                        } else {
-                            //break;
-                        }
                   
+                   
+                    counter++;
+                    var j=counter-1;
+                    this.setState({finished:false})
+                    var interval2 = setInterval(()=>{
+                        if(j>=0){
+                            if(this.state.status){
+                                        
+                         this.setState({green : j})
+                        
+                         if (parseInt(copy[j + 1]) < parseInt(copy[j])) {
+                             const temp = copy[j];
+                             copy[j] = copy[j + 1];
+                             copy[j + 1] = temp;
+                             this.setState({blue : counter})
+                         
+                            this.setState({array:copy})
+                         }else{
+                            this.setState({blue : counter})
+                         }
+                         j--;
+                        }else{
+                            clearInterval(interval2)
+                        }
+                            }else{
+                                this.setState({finished:true})
+                                clearInterval(interval2)
+                                this.setState({green:null})
+                            }
+                
+                    },this.state.interval)
                 }
-            },this.state.timeout)
-     
-        }
+            }else{
+                this.setState({blue:null})
+                clearInterval(interval1)
+                this.setState({message : 'sort finished'})
+                this.setState({status:false,id:'end-message'})
+            }
+        },this.state.interval)
+        
     };
 
     render() {
@@ -77,9 +112,12 @@ class SortVisualizer extends Component {
                      })
                  }
                 </div>
+                <div id={this.state.id}>{this.state.message}</div>
                 <div className={"input-container"}>
+                  
                     <div>
                         <Input
+                        onChange={(event)=>{this.setState({interval :event.target.value})}}
                             elementId={"interval"}
                             type="text"
                             width={"300px"}
